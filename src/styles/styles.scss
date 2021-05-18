@@ -1,0 +1,43 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url(https://fonts.googleapis.com/css2?family=Roboto:wght@500&family=Ubuntu:wght@400&display=swap);
+
+$font-ubuntu: 'Ubuntu', sans-serif;
+$font-roboto: 'Roboto', sans-serif;
+
+$azul: #256985;
+
+body {
+  background-color: #d5e8ed;
+  color: #353535;
+  text-decoration: none;
+}
+
+.header__titulo {
+  font-family: $font-ubuntu;
+  width: 740px;
+  max-width: 100vw;
+}
+
+.titulo {
+  font-family: $font-ubuntu;
+}
+
+.ancho-fijo {
+  max-width: 740px;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  width: 24px;
+  -webkit-appearance: none;
+  appearance: none;
+  height: 24px;
+  cursor: ew-resize;
+  background: #d6faff;
+  box-shadow: -410px 0 0 400px  #0891b2;
+  border-radius: 50%;
+  border: 2px solid #0891b2;
+  
+}

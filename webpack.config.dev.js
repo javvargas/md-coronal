@@ -1,12 +1,14 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
   entry: './src/index.js',
   output: {
     path: path.resolve(__dirname, 'dist'),
-    filename: 'bundle.js'
+    filename: 'bundle.js',
+    publicPath: '/'
   },
   resolve: {
     extensions: ['.js', '.jsx']
@@ -28,29 +30,46 @@ module.exports = {
         ]
       },
       {
-        test: /\.s[ac]ss$/,
+        test: /\.(s*)css$/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
           },
           'css-loader',
-          'sass-loader'
+          'sass-loader',
+          'postcss-loader',
         ]
-      } 
+      },
+      {
+        test: /\.png/,
+        type: 'asset/resource'
+      }
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
-      filename: './index.html'
+      filename: './index.html',
+      favicon: "./src/assets/images/favicon.ico"
     }),
     new MiniCssExtractPlugin({
       filename: 'assets/[name].css'
+    }),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, "src", "assets/images"),
+          to: "assets/images"
+        }
+      ]
     })
   ],
   devServer: {
+    historyApiFallback: true,
     contentBase: path.join(__dirname, 'dist'),
     compress: true,
-    port: 3006
+    open: true,
+    port: '3000',
+    host: '172.30.0.57'
   }
 }

@@ -1,6 +1,7 @@
 const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
+const CopyPlugin = require('copy-webpack-plugin');
 const CssMinimizerPliugin = require('css-minimizer-webpack-plugin')
 const TerserPlugin = require('terser-webpack-plugin')
 const { CleanWebpackPlugin } = require('clean-webpack-plugin')
@@ -11,7 +12,7 @@ module.exports = {
   output: {
     path: path.resolve(__dirname, 'dist'),
     filename: 'bundle.js',
-    publicPath: '/',
+    publicPath: '/'
   },
   resolve: {
     extensions: ['.js', '.jsx'],
@@ -37,26 +38,40 @@ module.exports = {
         ]
       },
       {
-        test: /\.s[ac]ss$/,
+        test: /\.(s*)css$/,
         use: [
           {
             loader: MiniCssExtractPlugin.loader
           },
           'css-loader',
-          'sass-loader'
+          'sass-loader',
+          'postcss-loader',
         ]
+      },
+      {
+        test: /\.png/,
+        type: 'asset/resource'      
       } 
     ]
   },
   plugins: [
     new HtmlWebpackPlugin({
       template: './public/index.html',
-      filename: './index.html'
+      filename: './index.html',
+      favicon: "./src/assets/images/favicon.ico"
     }),
     new MiniCssExtractPlugin({
       filename: 'assets/[name].css'
     }),
-    new CleanWebpackPlugin()
+    new CleanWebpackPlugin(),
+    new CopyPlugin({
+      patterns: [
+        {
+          from: path.resolve(__dirname, "src", "assets/images"),
+          to: "assets/images"
+        }
+      ]
+    })
   ],
   optimization: {
     minimize: true,
