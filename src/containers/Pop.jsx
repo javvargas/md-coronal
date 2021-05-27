@@ -1,23 +1,77 @@
-import React from 'react'
+import React, { useState, useEffect } from 'react'
+import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { useHistory } from 'react-router-dom'
 
 import Header from '../components/Header'
-import Titulo from '../components/Titulo'
 import Botonera from './Botonera'
-import Radio from '../components/Radio'
-import Campo from '../components/Campo'
 import Radiografia from './Radiografia'
 
-const Pop = () => (
-    <div className="flex ">
+const Pop = () => {
+  let history = useHistory();
+  const [selPop, setSelPop] = useState({
+    lateral: '',
+    posicion: '',
+    rx: '',
+    soporte: ''
+  })
+  const [validador, setValidador] = useState([])
+  const [botonActivo, setbotonActivo] = useState('')
+
+  const actualizaValores = (nombre, valor) => {
+    setSelPop({ ...selPop, [nombre] : valor }) 
+  }
+  
+  useEffect(() => {
+    (validador.length > 0) && recarga()
+  }, [selPop])
+
+
+  const recarga = () => {
+    const propiedades = Object.keys(selPop)
+    const resultados = Object.values(selPop)
+
+    const validar = []
+    resultados.forEach((e, i) => {
+      (e === '') && validar.push(propiedades[i])
+    })
+    setValidador(validar)
+    return validar
+  }
+
+  const enviarForm = () => {
+    const validar = recarga()
+
+    // Esta vacio el array puede enviar la informacion a la API
+    if (validar.length === 0) {
+      setbotonActivo('disabled')
+      cargando()
+      apiGuardar('/v1/pops', selPop, 2, '80502802')
+      .then(resultado => {
+        if (resultado === 'OK') {
+          confirmacion()
+        } else {
+          error(resultado)
+        }
+        history.push('/')
+      })
+    }
+  }
+
+
+  return (
+    <div className="flex">
       <div className="flex-grow"></div>
       <div className="flex-none flex-shrink w-screen md:w-auto ancho-fijo">
-        <Header />
-        <Radiografia />
+        <form >
+          <Header /> 
+          <Radiografia acumulador={ actualizaValores } validador={validador} />
 
-        <Botonera titulo1="Enviar" titulo2="Atrás" doble={true} />
+          <Botonera enviarInfo={ enviarForm } botonActivo={ botonActivo } titulo1="Enviar" titulo2="Atrás" doble={true}  />
+        </form>
       </div>
       <div className="flex-grow"></div>
     </div>
   )
+}
 
 export default Pop

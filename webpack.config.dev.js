@@ -70,6 +70,6 @@ module.exports = {
     compress: true,
     open: true,
     port: '3000',
-    host: '172.30.0.57'
+    host: '172.19.25.159'
   }
 }

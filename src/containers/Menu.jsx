@@ -11,11 +11,6 @@ const Menu = () => {
 
   const valores = [{id: 'ingreso', item: 'Ingreso'}, {id: 'tac', item: 'TAC'}, {id: 'cirugia', item: 'Datos de cirugia'}, {id: 'pop', item: 'Radiografía POP inmediato'}, {id: 'semanas2', item: '2 Semanas'}, {id: 'semanas6', item: '6 Semanas'}, {id: 'meses6', item: '6 Meses'}]
 
-  const handleSubmit = e => {
-    e.preventDefault()
-    console.log(e.target)
-  }
-
   const handleSeleccion = seleccion => {
     setUbicacion(seleccion)
   }
@@ -27,10 +22,8 @@ const Menu = () => {
         <Header />
         <Bienvenida />
         <Titulo titulo="Menú"/>
-        <form onSubmit={handleSubmit}>
-          <Radio seleccion={ handleSeleccion } valores={valores} label="¿Qué desea ingresar?" grupo="menu" primero/>
-          <Botonera titulo1="Siguiente" ubicacion={ubicacion} />
-        </form>
+        <Radio seleccion={ handleSeleccion } valores={valores} label="¿Qué desea ingresar?" grupo="menu" primero/>
+        <Botonera titulo1="Siguiente" ubicacion={ubicacion} />
       </div>
       <div className="flex-grow"></div>
     </div>
