@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react'
-import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { apiGuardar, cargando, confirmacion, error, limpiaOtros } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Botonera from './Botonera'
 import Control from './Control'
 import Clinica from './Clinica'
 
-const Semanas6 = () =>  {
+const Semanas6 = ({global}) =>  {
   let history = useHistory();
   const [selSemanas6, setSelSemanas6] = useState({ reduccion: '', posicion: '', perdida: '', perdida_otro: '', tug: '', herida: '', herida_otro: '', vas: 0 })
   const [validador, setValidador] = useState([])
@@ -38,7 +39,7 @@ const Semanas6 = () =>  {
     const validar = recarga()
 
     //quitar elemento del campo "otro"
-    if (selSemanas6.perdida_otro === '' && selSemanas6.perdida !== 'Si') {
+    if (selSemanas6.perdida_otro === '' && selSemanas6.perdida.substring(0,4) !== 'Si, ') {
       var index = validar.indexOf('perdida_otro');
       if (index !== -1) {
         validar.splice(index, 1);
@@ -55,7 +56,8 @@ const Semanas6 = () =>  {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/semanas6s', selSemanas6, 2, '80502802')
+      const datosLimpios = limpiaOtros(selSemanas6, 'semanas6')
+      apiGuardar('/v1/semanas6s', datosLimpios, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -64,6 +66,8 @@ const Semanas6 = () =>  {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 
@@ -80,7 +84,7 @@ const Semanas6 = () =>  {
   } else {
     validadorHerida = validador.includes('herida')
   }
-  if (selSemanas6.perdida === 'Si') {
+  if (selSemanas6.perdida.substring(0,4) === 'Si, ') {
     validadorPerdida = selSemanas6.perdida_otro === ''
   } else {
     validadorPerdida = validador.includes('perdida')

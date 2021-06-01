@@ -2,6 +2,7 @@ const path = require('path')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const MiniCssExtractPlugin = require('mini-css-extract-plugin')
 const CopyPlugin = require('copy-webpack-plugin');
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
 module.exports = {
   entry: './src/index.js',
@@ -41,7 +42,7 @@ module.exports = {
         ]
       },
       {
-        test: /\.png/,
+        test: /\.(png|svg|jpg|jpeg|gif)$/i,
         type: 'asset/resource'
       }
     ]
@@ -62,7 +63,8 @@ module.exports = {
           to: "assets/images"
         }
       ]
-    })
+    }),
+    new NodePolyfillPlugin()
   ],
   devServer: {
     historyApiFallback: true,
@@ -70,6 +72,6 @@ module.exports = {
     compress: true,
     open: true,
     port: '3000',
-    host: '172.19.25.159'
+    host: '172.19.240.24'
   }
 }

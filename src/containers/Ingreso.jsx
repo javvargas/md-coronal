@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { apiGuardar, cargando, confirmacion, error, limpiaOtros } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Titulo from '../components/Titulo'
@@ -10,20 +11,19 @@ import Campo from '../components/Campo'
 import Selector from '../components/Selector'
 import Eq5d from './Eq5d'
 
-const Ingreso = () => {
+const Ingreso = ({global}) => {
   let history = useHistory();
-
   const datosGenero = [{id: 1, item: 'Mujer'}, {id: 2, item: 'Hombre'}]
   const datosEstabilidad = [{id: 1, item: 'Estable'}, {id: 2, item: 'Inestable'}, {id: 3, item: 'Severamente Inestable'}]
   const datosSospecha = [{id: 1, item: 'Si'}, {id: 2, item: 'No'}, {id: 3, item: 'Posiblemente'}]
   const datosIdentifica = [{id: 1, item: 'Si'}, {id: 2, item: 'No'}, {id: 3, item: 'Otro:'}]
 
-  const [selIngreso, setSelIngreso] = useState({ nombre: '', identificacion: '', edad: '', genero: '', clasificacion: '', estabilidad: '', sospecha: '', identifica: '', identifica_otro: '', movilidad: '', cuidado: '', actividades: '', dolor: '', ansiedad: '' })
+  const [selIngreso, setSelIngreso] = useState({ nombre: '', identificacion:'', edad: '', genero: '', clasificacion: '', estabilidad: '', sospecha: '', identifica: '', identifica_otro: '', movilidad: '', cuidado: '', actividades: '', dolor: '', ansiedad: '' })
   const [validador, setValidador] = useState([])
   const [botonActivo, setbotonActivo] = useState('')
 
   const actualizaValores = (nombre, valor) => {
-    setSelIngreso({ ...selIngreso, [nombre] : valor }) 
+    setSelIngreso({ ...selIngreso, [nombre] : valor, identificacion: global.identificacion }) 
   }
   
   useEffect(() => {
@@ -37,7 +37,9 @@ const Ingreso = () => {
 
     const validar = []
     resultados.forEach((e, i) => {
-      (e === '') && validar.push(propiedades[i])
+      if (propiedades[i] !== 'identificacion') {
+        (e === '') && validar.push(propiedades[i])
+      } 
     })
     setValidador(validar)
     return validar
@@ -58,7 +60,8 @@ const Ingreso = () => {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/ingresos', selIngreso, 2)
+      const datosLimpios = limpiaOtros(selIngreso, 'ingreso')
+      apiGuardar('/v1/ingresos', datosLimpios, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -67,28 +70,26 @@ const Ingreso = () => {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 
-
-
-  let validadorNombre, validadorIdentificacion, validadorEdad, validadorGenero, validadorClasificacion, validadorEstabilidad, validadorSospecha, validadorIdentifica, validadorOlvide = false
+  let validadorNombre, validadorEdad, validadorGenero, validadorClasificacion, validadorEstabilidad, validadorSospecha, validadorIdentifica = false
 
   validadorNombre = (validador.includes('nombre'))
-  validadorIdentificacion = (validador.includes('identificacion'))
   validadorEdad = (validador.includes('edad'))
   validadorGenero = (validador.includes('genero'))
   validadorClasificacion = (validador.includes('clasificacion'))
   validadorEstabilidad = (validador.includes('estabilidad'))
   validadorSospecha = (validador.includes('sospecha'))
-  validadorOlvide = (validador.includes('olvide'))
 
   if (selIngreso.identifica.substring(0,4) === 'Otro') {
     validadorIdentifica = selIngreso.identifica_otro === ''
   } else {
     validadorIdentifica = validador.includes('identifica')
   }
-  
+
   return (
     <div className="flex ">
       <div className="flex-grow"></div>
@@ -96,7 +97,7 @@ const Ingreso = () => {
         <Header />
         <Titulo titulo="Ingreso" />
         <Campo name="nombre" label="Nombre" tipo="text" primero={true} acumulador={ actualizaValores } isInvalid={validadorNombre}  />
-        <Campo name="identificacion" label="Identificación" tipo='number' acumulador={ actualizaValores } isInvalid={validadorIdentificacion}  />
+        <Campo name="identificacion" label="Identificación" tipo='number' acumulador={ actualizaValores }  identi={global.identificacion} />
         <Campo name="edad" label="Edad" tipo='number' acumulador={ actualizaValores } isInvalid={validadorEdad} />
         <Radio valores={datosGenero} label="Genero" grupo="genero" acumulador={ actualizaValores } isInvalid={validadorGenero} />
         <Selector name="clasificacion" label="Clasificación AO inicial" acumulador={ actualizaValores } isInvalid={validadorClasificacion} />

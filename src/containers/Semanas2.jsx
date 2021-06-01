@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
-import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { apiGuardar, cargando, confirmacion, error, limpiaOtros } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Botonera from './Botonera'
 import Clinica from './Clinica'
 
-const Semanas2 = () => {
+const Semanas2 = ({global}) => {
   let history = useHistory();
   const [selSemanas2, setSelSemanas2] = useState({ tug: '', herida: '', herida_otro: '', vas: 0 })
   const [validador, setValidador] = useState([])
@@ -49,7 +50,8 @@ const Semanas2 = () => {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/semanas2s', selSemanas2, 2, '80502802')
+      const datosLimpios = limpiaOtros(selSemanas2, 'semanas2')
+      apiGuardar('/v1/semanas2s', datosLimpios, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -58,6 +60,8 @@ const Semanas2 = () => {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 

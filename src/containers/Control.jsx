@@ -6,7 +6,7 @@ import Radio from '../components/Radio'
 const Control = ({ acumulador, validadorReduccion, validadorPosicion, validadorPerdida, datos }) => {
   const datosReduccion = [{id: 1, item: 'Anatómica'}, {id: 2, item: 'Aceptable'}, {id: 3, item: 'Inaceptable'}]
   const datosPosicion = [{id: 1, item: 'Centro'}, {id: 2, item: 'Excéntrica'}]
-  const datosPerdida = [{id: 1, item: 'No'}, {id: 2, item: 'Si'}]
+  const datosPerdida = [{id: 1, item: 'No'}, {id: 2, item: 'Si, describa'}]
 
   return (
     <div>

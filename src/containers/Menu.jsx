@@ -1,29 +1,57 @@
-import React, { useState } from 'react'
+import React, { useState, Fragment } from 'react'
+import { apiPaciente, cargando, cerrarSwal } from '../utils/utils'
 
 import Header from '../components/Header'
 import Bienvenida from '../components/Bienvenida'
 import Titulo from '../components/Titulo'
-import Radio from '../components/Radio'
+import Texto from '../components/Texto'
+import Busqueda from '../components/Busqueda'
 import Botonera from './Botonera'
 
-const Menu = () => {
-  const [ubicacion, setUbicacion] = useState('menu')
+const Menu = ({global, setGlobal}) => {
+  const [ubicacion, setUbicacion] = useState({ id: '/', item: ''})
+  const [selPaciente, setSelPaciente] = useState({ nombre: '', identificacion: '', menu: '' })
+  const [selBuscar, setSelBuscar] = useState('')
 
-  const valores = [{id: 'ingreso', item: 'Ingreso'}, {id: 'tac', item: 'TAC'}, {id: 'cirugia', item: 'Datos de cirugia'}, {id: 'pop', item: 'Radiografía POP inmediato'}, {id: 'semanas2', item: '2 Semanas'}, {id: 'semanas6', item: '6 Semanas'}, {id: 'meses6', item: '6 Meses'}]
-
-  const handleSeleccion = seleccion => {
-    setUbicacion(seleccion)
-  }
+  const handelBuscar = () => {
+    if (selBuscar !== '') {
+      cargando()
+      apiPaciente(selBuscar, global.token)
+      .then(resultado => {
+        if (resultado.paciente) { //si encuentra paciente
+          setSelPaciente({ 
+            ...selPaciente, nombre: resultado.paciente.nombre, identificacion: resultado.paciente.identificacion, menu: resultado.menu.id
+          })
+          setUbicacion({ ...ubicacion, id:resultado.menu.id, item:resultado.menu.item })
+          setGlobal({ ...global, identificacion: resultado.paciente.identificacion })
+        } else {
+          setSelPaciente({ ...selPaciente, nombre: 'Nuevo Paciente', identificacion: selBuscar, menu: 'ingreso' })
+          setUbicacion({ ...ubicacion, id: 'ingreso', item: 'Ingreso' })
+          setGlobal({ ...global, identificacion: selBuscar })
+        }
+        cerrarSwal()
+      })
+    }
+  }  
 
   return (
     <div className="flex">
       <div className="flex-grow"></div>
       <div className="flex-none flex-shrink w-screen md:w-auto ancho-fijo">
         <Header />
-        <Bienvenida />
-        <Titulo titulo="Menú"/>
-        <Radio seleccion={ handleSeleccion } valores={valores} label="¿Qué desea ingresar?" grupo="menu" primero/>
-        <Botonera titulo1="Siguiente" ubicacion={ubicacion} />
+        <Bienvenida genero={global.responsable.genero} especialista={global.responsable.nombre} />
+
+        <Busqueda buscar={ handelBuscar } datobusca={ setSelBuscar } nombrePaciente={ selPaciente.nombre } />
+
+        {selPaciente.identificacion !== '' &&
+          <Fragment>
+            <Titulo titulo="Al paciente le corresponde:"/>
+            <Texto texto={ubicacion.item} clases='font-bold' primero/>
+          </Fragment>
+        }
+
+        <Botonera titulo1="Siguiente" titulo2="Salir" ubicacion={ubicacion.id} doble />
+
       </div>
       <div className="flex-grow"></div>
     </div>

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react'
-import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { apiGuardar, cargando, confirmacion, error, limpiaOtros } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Titulo from '../components/Titulo'
@@ -9,7 +10,7 @@ import Texto from '../components/Texto'
 import Radio from '../components/Radio'
 import Selector from '../components/Selector'
 
-const Tac = () => {
+const Tac = ({global}) => {
   let history = useHistory();
   const textoTac = `Según el hallazgo en el tac clasifique el trazo coronal teniendo en cuenta  la clasificacion de cho. tenga en cuenta que la clasificación se divide en: \n\n1. Morfología Primaria: trazo de fractura que comienza en el centro del  macizo trocantéreo y sale a través de la cresta intertrocantérica.\n\n2. Morfología Secundaria: trazo de fractura que comienza en el macizo trocantéreo y sale a través del trocánter menor, sin comprometer la pared posteromedial. \n\n3. Morfología Terciaria: trazo de fractura que comienza en el margen anterior del macizo trocantéreo y sale a través de la cortical posteromedial del fémur.`
   const datosTac = [{id: 1, item: 'No'}, {id: 2, item: '#1 - Primaria'}, {id: 3, item: '#2 - Secundaria'}, {id: 4, item: '#3 - Terciaria'}, {id: 5, item: 'Otro y explique la caracterización del trazo que evidenció'}]
@@ -54,7 +55,8 @@ const Tac = () => {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/tacs', selTac, 2, '80502802')
+      const datosLimpios = limpiaOtros(selTac, 'tac')
+      apiGuardar('/v1/tacs', datosLimpios, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -63,6 +65,8 @@ const Tac = () => {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 

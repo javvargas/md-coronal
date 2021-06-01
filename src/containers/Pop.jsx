@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from 'react'
 import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Botonera from './Botonera'
 import Radiografia from './Radiografia'
 
-const Pop = () => {
+const Pop = ({global}) => {
   let history = useHistory();
   const [selPop, setSelPop] = useState({
     lateral: '',
@@ -45,7 +46,7 @@ const Pop = () => {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/pops', selPop, 2, '80502802')
+      apiGuardar('/v1/pops', selPop, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -54,6 +55,8 @@ const Pop = () => {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 

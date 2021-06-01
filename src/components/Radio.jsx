@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react'
 
-const Radio = ({ valores, grupo, label, primero, imagen, name, seleccion, acumulador, isInvalid, datos }) => {
+const Radio = ({ valores, grupo, label, primero, imagen, name, seleccion, acumulador, isInvalid, datos, valor }) => {
 
   const [ingreso_identifica, setIngreso_identifica] = useState(false)
   const [tac_tac, setTac_tac] = useState(false)
@@ -17,20 +17,15 @@ const Radio = ({ valores, grupo, label, primero, imagen, name, seleccion, acumul
     //seleccion de menu
     if (e.target.name === 'menu') {
       seleccion(e.target.id)
-    } else {
+    } else { 
       //campos de otros -> habilita el campo de texto
-      if (e.target.name === 'identifica' && e.target.value.substring(0,4) === 'Otro') {
-        setIngreso_identifica(true) 
-      } else {
-        setIngreso_identifica(false)
-        acumulador(`${e.target.name}_otro`, 'borrar')
-      }
+      (e.target.name === 'identifica' && e.target.value.substring(0,4) === 'Otro') ? setIngreso_identifica(true) : setIngreso_identifica(false);
       (e.target.name === 'tac' && e.target.value.substring(0,4) === 'Otro') ? setTac_tac(true) : setTac_tac(false);
       (e.target.name === 'fijacion' && e.target.value.substring(0,4) === 'Otro') ? setCirugia_fijacion(true) : setCirugia_fijacion(false);
       (e.target.name === 'maniobras' && e.target.value.substring(0,4) === 'Otro') ? setCirugia_maniobras(true) : setCirugia_maniobras(false);
       (e.target.name === 'complicacion' && e.target.value.substring(0,4) === 'Si, ') ? setCirugia_complicacion(true) : setCirugia_complicacion(false);
       (e.target.name === 'herida' && e.target.value.substring(0,4) === 'Otro') ? setSemanas2_herida(true) : setSemanas2_herida(false);
-      (e.target.name === 'perdida' && e.target.value === 'Si') ? setSemanas6_perdida(true) : setSemanas6_perdida(false);
+      (e.target.name === 'perdida' && e.target.value.substring(0,4) === 'Si, ') ? setSemanas6_perdida(true) : setSemanas6_perdida(false);
 
       acumulador(e.target.name, e.target.value)
 
@@ -68,13 +63,14 @@ const Radio = ({ valores, grupo, label, primero, imagen, name, seleccion, acumul
                 name={grupo} 
                 value={object.item} 
                 id={object.id}
+                checked={valor && valor === object.item}
                 className="form-radio h-5 w-5 text-cyan-700 focus:ring-lightBlue-200" 
                 onChange={ handleChange }
               />
               <span className="ml-4 text-gray-700">{object.item}</span>
             </label>
             
-            {((object.item.substring(0,4) === 'Otro' || object.item.substring(0,4) === 'Si, ' || object.item === 'Si') && 
+            {((object.item.substring(0,4) === 'Otro' || object.item.substring(0,4) === 'Si, ') && 
             (ingreso_identifica || tac_tac || cirugia_fijacion || cirugia_maniobras || cirugia_complicacion || semanas2_herida || semanas6_perdida)) 
             && 
               <input 

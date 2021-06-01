@@ -1,17 +1,18 @@
 import React, { useState, useEffect } from 'react'
-import { apiGuardar, cargando, confirmacion, error } from '../utils/utils'
+import { apiGuardar, cargando, confirmacion, error, limpiaOtros } from '../utils/utils'
 import { useHistory } from 'react-router-dom'
+import { scroller } from 'react-scroll'
 
 import Header from '../components/Header'
 import Titulo from '../components/Titulo'
 import Botonera from './Botonera'
 import Radio from '../components/Radio'
 
-const Cirugia = () => {
+const Cirugia = ({global}) => {
   let history = useHistory();
   const datosIntraoperatoria = [{id: 1, item: 'Si'}, {id: 2, item: 'No'}]
-  const datosFijacion = [{id: 1, item: 'Clavo cefalomedular uniaxial'}, {id: 2, item: 'Clavo cefalomedular biaxial'}, {id: 3, item: 'DHS-Clavo/Placa'}, {id: 4, item: 'Placa anatomica femur proximal'}, {id: 5, item: 'Otros:'}]
-  const datosManiobras = [{id: 1, item: 'Pinzas'}, {id: 2, item: 'Cerclaje'}, {id: 3, item: 'Osteosintesis con tornillo'}, {id: 4, item: 'Gancho de Lambotte en el macizo trocanterico'}, {id: 5, item: 'Ajuste en el punto de entrada'}, {id: 6, item: 'Osteosintesis al trocanter mayor'}, {id: 7, item: 'No'}, {id: 8, item: 'Otros:'}]
+  const datosFijacion = [{id: 1, item: 'Clavo cefalomedular uniaxial'}, {id: 2, item: 'Clavo cefalomedular biaxial'}, {id: 3, item: 'DHS-Clavo/Placa'}, {id: 4, item: 'Placa anatómica femur proximal'}, {id: 5, item: 'Otros:'}]
+  const datosManiobras = [{id: 1, item: 'Pinzas'}, {id: 2, item: 'Cerclaje'}, {id: 3, item: 'Osteosíntesis con tornillo'}, {id: 4, item: 'Gancho de Lambotte en el macizo trocantérico'}, {id: 5, item: 'Ajuste en el punto de entrada'}, {id: 6, item: 'Osteosíntesis al trocánter mayor'}, {id: 7, item: 'No'}, {id: 8, item: 'Otros:'}]
   const datosComplicacion = [{id: 1, item: 'No'}, {id: 2, item: 'Si, explique'}]
   
   const [selCirugia, setSelCirugia] = useState({ intraoperatoria: '', fijacion: '', fijacion_otro: '', maniobras: '', maniobras_otro: '', complicacion: '', complicacion_otro: '' })
@@ -67,7 +68,8 @@ const Cirugia = () => {
     if (validar.length === 0) {
       setbotonActivo('disabled')
       cargando()
-      apiGuardar('/v1/cirugias', selCirugia, 2, '80502802')
+      const datosLimpios = limpiaOtros(selCirugia, 'cirugia')
+      apiGuardar('/v1/cirugias', datosLimpios, global.responsable.id, global.identificacion, global.token)
       .then(resultado => {
         if (resultado === 'OK') {
           confirmacion()
@@ -76,6 +78,8 @@ const Cirugia = () => {
         }
         history.push('/')
       })
+    } else { //si hay errores de validacion, muestra el campo a arreglar
+      scroller.scrollTo(validar[0], {duration: 1000, smooth: true, offset: -150 })
     }
   }
 
@@ -109,8 +113,8 @@ const Cirugia = () => {
       <div className="flex-grow"></div>
       <div className="flex-none flex-shrink w-screen md:w-auto ancho-fijo">
         <Header />
-        <Titulo titulo="Datos de Cirugia"/>
-        <Radio valores={datosIntraoperatoria} label="Identificacion intraoperatoria del trazo coronal" grupo="intraoperatoria" primero acumulador={ actualizaValores } isInvalid={validadorIntraoperatoria} />
+        <Titulo titulo="Datos de Cirugía"/>
+        <Radio valores={datosIntraoperatoria} label="Identificación intraoperatoria del trazo coronal" grupo="intraoperatoria" primero acumulador={ actualizaValores } isInvalid={validadorIntraoperatoria} />
         <Radio valores={datosFijacion} label="Método de fijación" grupo="fijacion" acumulador={ actualizaValores } isInvalid={validadorFijacion} datos={selCirugia.fijacion_otro} />
         <Radio valores={datosManiobras} label="Maniobras adicionales" grupo="maniobras" acumulador={ actualizaValores } isInvalid={validacionManiobras} datos={selCirugia.maniobras_otro} />
         <Radio valores={datosComplicacion} label="Complicación intraoperatoria" grupo="complicacion" acumulador={ actualizaValores } isInvalid={validacionComplicacion} datos={selCirugia.complicacion_otro} />
